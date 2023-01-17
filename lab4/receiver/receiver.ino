@@ -16,7 +16,11 @@ const int led2 = 6; //This one is built in
 const int led = 7;
 const uint32_t interval = 1000; //This variable defines how many ms LED's are turn on after receiving last signal
 uint32_t previousMillis = 0, previousMillis2 = 0;
+uint32_t previousMillisMiddle7 = 0;
+const int deviceNumberMiddle7 = 7;
+int isCommunicationStatusPrinted = 0;
 int led_status = 0, led2_status = 0;
+const uint32_t timeout = 10000; 
 
 // Protocol definition
 struct buf {
@@ -69,6 +73,8 @@ void setup()
   // Void pointers which are use to efficiently read data
   receive_buf_p = &receive_buf;
   receive_buf_p_0 = receive_buf_p;
+
+  previousMillisMiddle7 = 0;
 }
 
 void loop()
@@ -97,6 +103,11 @@ void loop()
       }
       else //If the CRC is correct
       {
+        if(receive_buf.device_number == deviceNumberMiddle7){
+          previousMillisMiddle7 = millis();
+          isCommunicationStatusPrinted = 0;
+        }
+        
         //Turn on the LED if the last data byte != 0
         if (receive_buf.data[15] != 0)
         {
@@ -107,23 +118,17 @@ void loop()
       }
   }
   
-  //Turning off the LEDs
-  /*if (led_status == 1)
-  {
-    if (millis() - previousMillis >= interval)
-    {
+  if (millis() - previousMillisMiddle7 >= timeout)
+    { 
+      previousMillis = millis();
       digitalWrite(led, LOW);
       led_status = 0;
+      if(isCommunicationStatusPrinted == 0){
+        Serial.println("No communication with device 7"); 
+        isCommunicationStatusPrinted = 1;
+      }
+      
     }
-  }
-  if (led2_status == 1)
-  {
-    if (millis() - previousMillis2 >= interval)
-    {
-      digitalWrite(led2, LOW);
-      led2_status = 0;
-    }
-  }*/
 }  
 
 //Calculates simple CRC-16-CCITT
