@@ -93,15 +93,24 @@ void loop()
         Serial.print("CHECK CRC ERROR  ");
         Serial.println(Check_CRC(receive_buf_p));
         digitalWrite(led2, HIGH);
+        delay(200);
+        digitalWrite(led2, LOW);
+        delay(200);
+        digitalWrite(led2, HIGH);
+        delay(200);
+        digitalWrite(led2, LOW);
         led2_status = 1;
         previousMillis2 = millis();
       }
       else //If the CRC is correct
       {
+        
         //Turn on the LED if the last data byte != 0
         if (receive_buf.data[15] != 0)
         {
-          digitalWrite(led, HIGH);
+          digitalWrite(led2, HIGH);
+          delay(500);
+          digitalWrite(led2, LOW);
           led_status = 1;
           previousMillis = millis();
         }
