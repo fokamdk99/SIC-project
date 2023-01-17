@@ -9,6 +9,8 @@ uint16_t Calculate_CRC(void *pointer);
 void PrintData(struct buf *send_buf_p);
 uint16_t Check_CRC(void *pointer);
 int NotDevice(struct buf *buf_p);
+void CheckCommunication(void *buf_p);
+void HandleNoCommunication();
 
 //Variables to use LEDs
 const int button = 5; //Just a pin number
@@ -16,9 +18,9 @@ const int led2 = 6; //This one is built in
 const int led = 7;
 const uint32_t interval = 1000; //This variable defines how many ms LED's are turn on after receiving last signal
 uint32_t previousMillis = 0, previousMillis2 = 0;
-uint32_t previousMillisMiddle7 = 0;
-const int deviceNumberMiddle7 = 7;
-int isCommunicationStatusPrinted = 0;
+uint32_t previousMillisMiddle7 = 0, previousMillisMiddle8 = 0, previousMillisMiddle9 = 0;
+const int deviceNumberMiddle7 = 7, deviceNumberMiddle8 = 8, deviceNumberMiddle9 = 9;
+int isCommunicationStatusPrinted7 = 0, isCommunicationStatusPrinted8 = 0, isCommunicationStatusPrinted9 = 0;
 int led_status = 0, led2_status = 0;
 const uint32_t timeout = 10000; 
 
@@ -103,10 +105,7 @@ void loop()
       }
       else //If the CRC is correct
       {
-        if(receive_buf.device_number == deviceNumberMiddle7){
-          previousMillisMiddle7 = millis();
-          isCommunicationStatusPrinted = 0;
-        }
+        CheckCommunication((buf *)receive_buf_p);
         
         //Turn on the LED if the last data byte != 0
         if (receive_buf.data[15] != 0)
@@ -117,18 +116,7 @@ void loop()
         }
       }
   }
-  
-  if (millis() - previousMillisMiddle7 >= timeout)
-    { 
-      previousMillis = millis();
-      digitalWrite(led, LOW);
-      led_status = 0;
-      if(isCommunicationStatusPrinted == 0){
-        Serial.println("No communication with device 7"); 
-        isCommunicationStatusPrinted = 1;
-      }
-      
-    }
+    HandleNoCommunication();
 }  
 
 //Calculates simple CRC-16-CCITT
@@ -169,4 +157,54 @@ void PrintData(struct buf *send_buf_p)
   Serial.print("; CRC:   ");
   Serial.println(send_buf_p->CRC);
   
+}
+
+void CheckCommunication(struct buf *buf_p){
+  if(buf_p->device_number == deviceNumberMiddle7){
+      previousMillisMiddle7 = millis();
+      isCommunicationStatusPrinted7 = 0;
+    }
+    if(buf_p->device_number == deviceNumberMiddle8){
+      previousMillisMiddle8 = millis();
+      isCommunicationStatusPrinted8 = 0;
+    }
+    if(buf_p->device_number == deviceNumberMiddle9){
+      previousMillisMiddle8 = millis();
+      isCommunicationStatusPrinted9 = 0;
+    }
+}
+
+void HandleNoCommunication(){
+  if (millis() - previousMillisMiddle7 >= timeout)
+    { 
+      previousMillis = millis();
+      digitalWrite(led, LOW);
+      led_status = 0;
+      if(isCommunicationStatusPrinted7 == 0){
+        Serial.println("No communication with device 7"); 
+        isCommunicationStatusPrinted7 = 1;
+      } 
+    }
+
+  if (millis() - previousMillisMiddle8 >= timeout)
+    { 
+      previousMillis = millis();
+      digitalWrite(led, LOW);
+      led_status = 0;
+      if(isCommunicationStatusPrinted8 == 0){
+        Serial.println("No communication with device 12"); 
+        isCommunicationStatusPrinted8 = 1;
+      } 
+    }
+
+  if (millis() - previousMillisMiddle9 >= timeout)
+    { 
+      previousMillis = millis();
+      digitalWrite(led, LOW);
+      led_status = 0;
+      if(isCommunicationStatusPrinted9 == 0){
+        Serial.println("No communication with device 13"); 
+        isCommunicationStatusPrinted9 = 1;
+      } 
+    }
 }
